@@ -1,279 +1,146 @@
-"use client";
-
-import { useAccount, useReadContract, useReadContracts, useWriteContract, useWaitForTransactionReceipt } from "wagmi";
-import { ConnectWalletButton } from "@/components/ConnectWalletButton";
-import { PetRockCard } from "@/components/PetRockCard";
-import { petRockContractConfig, PETROCK_CONTRACT_ADDRESS } from "@/lib/contract";
-import { useEffect, useState, useCallback } from "react";
+"use client"
+import { useAccount, useReadContract, useReadContracts } from 'wagmi'
+import { petRockContractConfig } from '@/lib/contract'
+import ConnectWalletButton from '@/components/ConnectWalletButton'
+import MintButton from '@/components/MintButton'
+import PetRockCard from '@/components/PetRockCard'
+import { useState, useEffect } from 'react'
 
 export default function Home() {
-  const { address, isConnected } = useAccount();
-  const [refreshKey, setRefreshKey] = useState(0);
+  const { address, isConnected } = useAccount()
+  const [rocks, setRocks] = useState<any[]>([])
 
-  // Force refresh function
-  const refreshData = useCallback(() => {
-    setRefreshKey((prev) => prev + 1);
-  }, []);
-
-  // Get user's balance
+  // 1. Get Balance
   const { data: balance, refetch: refetchBalance } = useReadContract({
     ...petRockContractConfig,
-    functionName: "balanceOf",
+    functionName: 'balanceOf',
     args: address ? [address] : undefined,
     query: {
-      enabled: !!address,
-    },
-  });
-
-  // Get total supply
-  const { data: totalSupply } = useReadContract({
-    ...petRockContractConfig,
-    functionName: "totalSupply",
-  });
-
-  // Build array of token queries
-  const tokenCount = balance ? Number(balance) : 0;
-  const tokenIndexes = Array.from({ length: tokenCount }, (_, i) => i);
-
-  // Get all token IDs owned by user
-  const { data: tokenIds, refetch: refetchTokenIds } = useReadContracts({
-    contracts: tokenIndexes.map((index) => ({
-      ...petRockContractConfig,
-      functionName: "tokenOfOwnerByIndex" as const,
-      args: [address!, BigInt(index)] as const,
-    })),
-    query: {
-      enabled: !!address && tokenCount > 0,
-    },
-  });
-
-  // Extract valid token IDs
-  const validTokenIds = tokenIds
-    ?.filter((result) => result.status === "success")
-    .map((result) => result.result as bigint) || [];
-
-  // Get XP and lastFedAt for each token
-  const { data: tokenData, refetch: refetchTokenData } = useReadContracts({
-    contracts: validTokenIds.flatMap((tokenId) => [
-      {
-        ...petRockContractConfig,
-        functionName: "xp" as const,
-        args: [tokenId] as const,
-      },
-      {
-        ...petRockContractConfig,
-        functionName: "lastFedAt" as const,
-        args: [tokenId] as const,
-      },
-    ]),
-    query: {
-      enabled: validTokenIds.length > 0,
-    },
-  });
-
-  // Parse token data
-  const rocks = validTokenIds.map((tokenId, index) => {
-    const xpResult = tokenData?.[index * 2];
-    const lastFedResult = tokenData?.[index * 2 + 1];
-
-    return {
-      tokenId,
-      xp: xpResult?.status === "success" ? (xpResult.result as bigint) : BigInt(0),
-      lastFedAt: lastFedResult?.status === "success" ? (lastFedResult.result as bigint) : BigInt(0),
-    };
-  });
-
-  // Mint transaction
-  const { writeContract, data: mintHash, isPending: isMinting, error: mintError } = useWriteContract();
-
-  const { isLoading: isMintConfirming, isSuccess: isMintSuccess } = useWaitForTransactionReceipt({
-    hash: mintHash,
-  });
-
-  // Refresh data after successful mint
-  useEffect(() => {
-    if (isMintSuccess) {
-      const timer = setTimeout(() => {
-        refetchBalance();
-        refetchTokenIds();
-        refetchTokenData();
-        refreshData();
-      }, 2000);
-      return () => clearTimeout(timer);
+      enabled: !!address
     }
-  }, [isMintSuccess, refetchBalance, refetchTokenIds, refetchTokenData, refreshData]);
+  })
 
-  const handleMint = () => {
-    writeContract({
-      ...petRockContractConfig,
-      functionName: "mint",
-    });
-  };
+  // 2. Prepare calls for token IDs
+  const balanceNum = balance ? Number(balance) : 0
+  const tokenIndexCalls = Array.from({ length: balanceNum }, (_, i) => ({
+    ...petRockContractConfig,
+    functionName: 'tokenOfOwnerByIndex',
+    args: [address!, BigInt(i)]
+  }))
 
-  const handleFeedSuccess = useCallback(() => {
-    setTimeout(() => {
-      refetchTokenData();
-    }, 2000);
-  }, [refetchTokenData]);
+  const { data: tokenIdsResult, refetch: refetchTokenIds } = useReadContracts({
+    contracts: tokenIndexCalls,
+    query: {
+      enabled: balanceNum > 0 && !!address
+    }
+  })
 
-  // Check if contract is configured
-  const isContractConfigured = PETROCK_CONTRACT_ADDRESS !== "0x0000000000000000000000000000000000000000";
+  const tokenIds = tokenIdsResult?.map(r => r.result as bigint).filter(t => t !== undefined) || []
+
+  // 3. Prepare calls for rock details
+  const rockDetailsCalls = tokenIds.flatMap(id => [
+    { ...petRockContractConfig, functionName: 'xp', args: [id] },
+    { ...petRockContractConfig, functionName: 'lastFedAt', args: [id] },
+    { ...petRockContractConfig, functionName: 'canFeed', args: [id] },
+    { ...petRockContractConfig, functionName: 'timeUntilNextFeed', args: [id] }
+  ])
+
+  const { data: rockDetailsResult, refetch: refetchDetails } = useReadContracts({
+    contracts: rockDetailsCalls,
+    query: {
+      enabled: tokenIds.length > 0
+    }
+  })
+
+  // Process data
+  useEffect(() => {
+    if (!tokenIds.length || !rockDetailsResult) {
+      if (balanceNum === 0) setRocks([])
+      return
+    }
+
+    const newRocks = []
+    for (let i = 0; i < tokenIds.length; i++) {
+      const baseIdx = i * 4
+      // Ensure we have results for all fields
+      if (
+        rockDetailsResult[baseIdx]?.status === 'success' &&
+        rockDetailsResult[baseIdx + 1]?.status === 'success' &&
+        rockDetailsResult[baseIdx + 2]?.status === 'success' &&
+        rockDetailsResult[baseIdx + 3]?.status === 'success'
+      ) {
+        newRocks.push({
+          id: tokenIds[i],
+          xp: rockDetailsResult[baseIdx].result,
+          lastFedAt: rockDetailsResult[baseIdx + 1].result,
+          canFeed: rockDetailsResult[baseIdx + 2].result,
+          timeUntilNextFeed: rockDetailsResult[baseIdx + 3].result
+        })
+      }
+    }
+    setRocks(newRocks)
+  }, [tokenIdsResult, rockDetailsResult, balanceNum])
+
+  const refresh = () => {
+    refetchBalance()
+    refetchTokenIds()
+    refetchDetails()
+  }
 
   return (
-    <div className="min-h-screen py-8 px-4 sm:px-6">
-      <div className="max-w-2xl mx-auto">
-        {/* Header */}
-        <header className="text-center mb-10">
-          <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-rock-600 to-rock-800 rounded-full mb-4 shadow-pixel animate-float">
-            <span className="text-4xl pixel-art">🪨</span>
+    <main className="flex min-h-screen flex-col items-center p-4 md:p-8 max-w-md mx-auto relative font-pixel">
+      <header className="w-full text-center mb-8 mt-4">
+        <h1 className="text-2xl md:text-3xl font-bold mb-2 text-blue-600 drop-shadow-sm leading-relaxed">
+          Onchain<br />Pet Rock
+        </h1>
+        <p className="text-[10px] md:text-xs text-gray-600 uppercase tracking-widest">Mint • Feed • Grow</p>
+      </header>
+
+      {!isConnected ? (
+        <div className="flex flex-col items-center gap-8 mt-10 w-full">
+          <div className="text-8xl animate-bounce-slow filter drop-shadow-lg">🪨</div>
+          <div className="bg-white p-6 pixel-borders w-full text-center">
+            <p className="mb-4 text-xs leading-5">Connect your wallet to adopt a rock.</p>
+            <ConnectWalletButton />
           </div>
-          
-          <h1 className="font-pixel text-2xl sm:text-3xl gradient-text mb-3">
-            Onchain Pet Rock
-          </h1>
-          
-          <p className="text-rock-400 font-mono text-sm max-w-md mx-auto leading-relaxed">
-            Mint your own rock and feed it every day for XP. The more you care, the more it grows.
-          </p>
-
-          {/* Stats */}
-          {totalSupply !== undefined && (
-            <div className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-rock-900/50 rounded-full border border-rock-700">
-              <span className="text-rock-400 font-mono text-xs">Total Rocks:</span>
-              <span className="text-pixel-gold font-mono font-bold">{totalSupply.toString()}</span>
-            </div>
-          )}
-        </header>
-
-        {/* Contract Warning */}
-        {!isContractConfigured && (
-          <div className="mb-6 p-4 bg-amber-900/30 border border-amber-700 rounded-xl">
-            <div className="flex items-start gap-3">
-              <span className="text-2xl">⚠️</span>
-              <div>
-                <h3 className="font-mono font-bold text-amber-400 mb-1">Contract Not Configured</h3>
-                <p className="text-amber-300/80 text-sm font-mono">
-                  Please deploy the PetRockNFT contract and set NEXT_PUBLIC_PETROCK_CONTRACT_ADDRESS in your .env.local file.
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Connect Section */}
-        <div className="flex justify-center mb-8">
-          <ConnectWalletButton />
         </div>
-
-        {/* Main Content */}
-        {!isConnected ? (
-          <div className="text-center py-12 px-6 bg-rock-900/50 rounded-xl border border-rock-800">
-            <div className="text-5xl mb-4 animate-bounce-slow">🔗</div>
-            <h2 className="font-pixel text-sm text-rock-300 mb-2">Connect Your Wallet</h2>
-            <p className="text-rock-500 font-mono text-sm">
-              Connect your wallet to see your rocks and mint new ones.
-            </p>
+      ) : (
+        <div className="w-full flex flex-col items-center gap-8">
+          <div className="flex justify-between w-full items-center px-2 bg-white/50 p-2 rounded pixel-borders">
+            <span className="text-[10px] font-bold text-gray-500">OWNER</span>
+            <ConnectWalletButton />
           </div>
-        ) : (
-          <div className="space-y-6">
-            {/* Mint Section */}
-            <div className="bg-rock-900/50 rounded-xl border border-rock-800 p-6">
-              <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-                <div>
-                  <h2 className="font-pixel text-xs text-rock-300 mb-1">Your Collection</h2>
-                  <p className="text-rock-500 font-mono text-sm">
-                    {tokenCount === 0
-                      ? "You don't have any rocks yet!"
-                      : `You own ${tokenCount} rock${tokenCount > 1 ? "s" : ""}`}
-                  </p>
-                </div>
-                
-                <button
-                  onClick={handleMint}
-                  disabled={isMinting || isMintConfirming || !isContractConfigured}
-                  className="
-                    px-6 py-3
-                    bg-gradient-to-r from-pixel-pink to-rose-500
-                    text-white font-bold
-                    rounded-lg
-                    shadow-pixel
-                    hover:shadow-pixel-lg
-                    transition-all duration-200
-                    btn-press
-                    font-mono text-sm
-                    disabled:opacity-50 disabled:cursor-not-allowed
-                    flex items-center gap-2
-                    w-full sm:w-auto justify-center
-                  "
-                >
-                  {isMinting || isMintConfirming ? (
-                    <>
-                      <span className="spinner" />
-                      {isMinting ? "Confirming..." : "Minting..."}
-                    </>
-                  ) : (
-                    <>
-                      <span>⛏️</span>
-                      Mint Pet Rock
-                    </>
-                  )}
-                </button>
+
+          <div className="w-full flex flex-col gap-6 items-center">
+            {rocks.length > 0 ? (
+              rocks.map((rock) => (
+                <PetRockCard
+                  key={rock.id.toString()}
+                  tokenId={rock.id}
+                  xp={rock.xp}
+                  lastFedAt={rock.lastFedAt}
+                  canFeed={rock.canFeed}
+                  timeUntilNextFeed={rock.timeUntilNextFeed}
+                  onUpdate={refresh}
+                />
+              ))
+            ) : (
+              <div className="text-center py-10 opacity-60">
+                <p className="text-sm">No rocks found.</p>
+                <p className="text-[10px] mt-2">Mint to generate your unique pet!</p>
               </div>
+            )}
 
-              {/* Mint Error */}
-              {mintError && (
-                <div className="mt-4 p-3 bg-red-900/30 border border-red-800 rounded-lg">
-                  <p className="text-xs font-mono text-red-400 text-center">
-                    Failed to mint. Please try again.
-                  </p>
-                </div>
-              )}
-
-              {/* Mint Success */}
-              {isMintSuccess && (
-                <div className="mt-4 p-3 bg-green-900/30 border border-green-800 rounded-lg">
-                  <p className="text-xs font-mono text-green-400 text-center">
-                    🎉 Successfully minted your new Pet Rock!
-                  </p>
-                </div>
-              )}
+            <div className="mt-4 w-full flex justify-center">
+              <MintButton onMintSuccess={refresh} />
             </div>
-
-            {/* Rocks Grid */}
-            {rocks.length > 0 && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4" key={refreshKey}>
-                {rocks.map((rock) => (
-                  <PetRockCard
-                    key={rock.tokenId.toString()}
-                    tokenId={rock.tokenId}
-                    xp={rock.xp}
-                    lastFedAt={rock.lastFedAt}
-                    onFeedSuccess={handleFeedSuccess}
-                  />
-                ))}
-              </div>
-            )}
-
-            {/* Empty State */}
-            {isConnected && rocks.length === 0 && !isMinting && !isMintConfirming && (
-              <div className="text-center py-8">
-                <div className="text-4xl mb-3 opacity-50">🪨</div>
-                <p className="text-rock-500 font-mono text-sm">
-                  Mint your first rock to get started!
-                </p>
-              </div>
-            )}
           </div>
-        )}
+        </div>
+      )}
 
-        {/* Footer */}
-        <footer className="mt-12 text-center">
-          <p className="text-rock-600 font-mono text-xs">
-            Built with 💚 on Base
-          </p>
-        </footer>
-      </div>
-    </div>
-  );
+      <footer className="mt-auto py-8 text-[10px] text-gray-400 text-center">
+        <p>built on Base 🔵</p>
+      </footer>
+    </main>
+  )
 }
-

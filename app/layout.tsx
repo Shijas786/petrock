@@ -1,30 +1,54 @@
 import type { Metadata } from "next";
-import { headers } from "next/headers";
-import ContextProvider from "@/context";
 import "./globals.css";
+import ContextProvider from '@/context/ContextProvider'
+import { headers } from 'next/headers'
+import AudioPlayer from '@/components/AudioPlayer'
+
+// App URL - update this when deploying
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://onchain-pet-rock.vercel.app';
 
 export const metadata: Metadata = {
   title: "Onchain Pet Rock",
-  description: "Mint your own Pet Rock NFT and feed it every day for XP!",
-  icons: {
-    icon: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🪨</text></svg>",
+  description: "Mint and feed your pet rock onchain",
+  // Farcaster Frame metadata
+  other: {
+    "fc:frame": "vNext",
+    "fc:frame:image": `${APP_URL}/og-image.png`,
+    "fc:frame:image:aspect_ratio": "1:1",
+    "fc:frame:button:1": "🪨 Open App",
+    "fc:frame:button:1:action": "launch_frame",
+    "fc:frame:button:1:target": APP_URL,
+    // Mini App manifest
+    "of:version": "vNext",
+    "of:accepts:xmtp": "2024-02-01",
+    "of:image": `${APP_URL}/og-image.png`,
+  },
+  openGraph: {
+    title: "Onchain Pet Rock",
+    description: "Mint and feed your pet rock onchain. Built on Base.",
+    images: [`${APP_URL}/og-image.png`],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Onchain Pet Rock",
+    description: "Mint and feed your pet rock onchain. Built on Base.",
+    images: [`${APP_URL}/og-image.png`],
   },
 };
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const headersObj = await headers();
-  const cookies = headersObj.get("cookie");
+  const cookies = headers().get('cookie')
 
   return (
     <html lang="en">
-      <body className="antialiased">
+      <body className="antialiased bg-pastel-bg min-h-screen text-foreground">
         <ContextProvider cookies={cookies}>
-          <div className="noise-overlay" />
-          <main className="min-h-screen grid-bg">{children}</main>
+          <AudioPlayer />
+          {children}
         </ContextProvider>
       </body>
     </html>
