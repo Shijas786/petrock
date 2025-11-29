@@ -4,6 +4,7 @@ import { petRockContractConfig } from '@/lib/contract'
 import ConnectWalletButton from '@/components/ConnectWalletButton'
 import MintButton from '@/components/MintButton'
 import PetRockCard from '@/components/PetRockCard'
+import Leaderboard from '@/components/Leaderboard'
 import { useState, useEffect } from 'react'
 
 export default function Home() {
@@ -95,6 +96,11 @@ export default function Home() {
         </h1>
         <p className="text-[10px] md:text-xs text-gray-600 uppercase tracking-widest">Mint • Feed • Grow</p>
       </header>
+
+      {/* Leaderboard - visible to all */}
+      <div className="w-full mb-8">
+        <Leaderboard />
+      </div>
 
       {!isConnected ? (
         <div className="flex flex-col items-center gap-8 mt-10 w-full">
