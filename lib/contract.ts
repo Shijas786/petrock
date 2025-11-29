@@ -225,10 +225,9 @@ export const PETROCK_ABI = [
   },
 ] as const;
 
-// Contract address from environment variable
-// TODO: Set NEXT_PUBLIC_PETROCK_CONTRACT_ADDRESS in your .env.local file
+// Contract address - deployed on Base mainnet
 export const PETROCK_CONTRACT_ADDRESS = (process.env.NEXT_PUBLIC_PETROCK_CONTRACT_ADDRESS ||
-  "0x0000000000000000000000000000000000000000") as `0x${string}`;
+  "0x0AAA4F6ff0FCC295CEC4CB4ceA97d941B4535FCC") as `0x${string}`;
 
 // Contract config object for use with wagmi hooks
 export const petRockContractConfig = {
