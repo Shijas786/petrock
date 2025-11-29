@@ -10,7 +10,8 @@ export const metadata: Metadata = {
   title: "Onchain Pet Rock",
   description: "Mint and feed your pet rock onchain",
   icons: {
-    icon: "/icon.svg",
+    icon: "/icon.png",
+    apple: "/icon.png",
   },
   // Farcaster Frame metadata
   other: {
