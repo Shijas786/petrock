@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import "./globals.css";
 import ContextProvider from '@/context/ContextProvider'
 import { headers } from 'next/headers'
-import AudioPlayer from '@/components/AudioPlayer'
 
 // App URL - update this when deploying
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://onchain-pet-rock.vercel.app';
@@ -47,7 +46,6 @@ export default function RootLayout({
     <html lang="en">
       <body className="antialiased bg-pastel-bg min-h-screen text-foreground">
         <ContextProvider cookies={cookies}>
-          <AudioPlayer />
           {children}
         </ContextProvider>
       </body>

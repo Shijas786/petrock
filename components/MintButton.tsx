@@ -9,8 +9,15 @@ export default function MintButton({ onMintSuccess }: { onMintSuccess: () => voi
         hash,
     })
 
+    const playSound = (type: 'click' | 'success') => {
+        const audio = new Audio(`/audio/${type}.wav`)
+        audio.volume = 0.4
+        audio.play().catch(e => console.log("Audio play failed", e))
+    }
+
     useEffect(() => {
         if (isSuccess) {
+            playSound('success')
             onMintSuccess()
         }
     }, [isSuccess, onMintSuccess])
@@ -19,10 +26,13 @@ export default function MintButton({ onMintSuccess }: { onMintSuccess: () => voi
         <div className="flex flex-col items-center gap-2">
             <button
                 disabled={isPending || isConfirming}
-                onClick={() => writeContract({
-                    ...petRockContractConfig,
-                    functionName: 'mint',
-                })}
+                onClick={() => {
+                    playSound('click')
+                    writeContract({
+                        ...petRockContractConfig,
+                        functionName: 'mint',
+                    })
+                }}
                 className="bg-green-500 hover:bg-green-600 text-white text-lg py-6 px-10 pixel-borders disabled:opacity-50 disabled:cursor-not-allowed transform active:scale-95 transition-transform"
             >
                 {isPending ? 'Confirming...' : isConfirming ? 'Minting...' : 'Mint New Rock'}
