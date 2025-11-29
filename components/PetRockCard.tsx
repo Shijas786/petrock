@@ -54,7 +54,6 @@ export default function PetRockCard({
         {/* Eating Reaction Overlay */}
         {isEating && (
           <div className="absolute inset-0 flex items-center justify-center">
-            <div className="text-4xl animate-ping absolute">❤️</div>
             <div className="bg-white/80 backdrop-blur-sm px-2 py-1 rounded pixel-borders text-xs font-bold absolute -top-4">
               YUM!
             </div>
