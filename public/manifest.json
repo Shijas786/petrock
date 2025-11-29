@@ -17,6 +17,8 @@
             "type": "image/png"
         }
     ],
+    "splashImageUrl": "https://onchain-pet-rock.vercel.app/splash.gif",
+    "splashBackgroundColor": "#E0F7FA",
     "screenshots": [
         {
             "src": "/screenshots/shot1.png",
