@@ -9,6 +9,9 @@ const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://onchain-pet-rock.ver
 export const metadata: Metadata = {
   title: "Onchain Pet Rock",
   description: "Mint and feed your pet rock onchain",
+  icons: {
+    icon: "/icon.svg",
+  },
   // Farcaster Frame metadata
   other: {
     "fc:frame": "vNext",
