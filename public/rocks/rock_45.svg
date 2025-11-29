@@ -2,9 +2,13 @@
   <!-- Bg Shadow -->
   <path d="M4 16 C4 8, 8 4, 16 4 C24 4, 28 8, 28 16 C28 24, 24 28, 16 28 C8 28, 4 24, 4 16 Z" transform="translate(2, 2)" fill="rgba(0,0,0,0.2)"/>
   <!-- Body -->
-  <path d="M4 16 C4 8, 8 4, 16 4 C24 4, 28 8, 28 16 C28 24, 24 28, 16 28 C8 28, 4 24, 4 16 Z" fill="#ADD8E6"/>
+  <path d="M4 16 C4 8, 8 4, 16 4 C24 4, 28 8, 28 16 C28 24, 24 28, 16 28 C8 28, 4 24, 4 16 Z" fill="#D3D3D3" stroke="black" stroke-width="1"/>
+  <!-- Texture Dots -->
+  <circle cx="10" cy="8" r="0.5" fill="rgba(0,0,0,0.2)"/>
+  <circle cx="24" cy="18" r="0.5" fill="rgba(0,0,0,0.2)"/>
+  <circle cx="14" cy="24" r="0.5" fill="rgba(0,0,0,0.2)"/>
   <!-- Face -->
-  <circle cx="12" cy="14" r="2" fill="black"/><circle cx="20" cy="14" r="2" fill="black"/><line x1="12" y1="20" x2="20" y2="20" stroke="black" stroke-width="2"/>
+  <circle cx="10" cy="12" r="2" fill="black"/><circle cx="22" cy="12" r="2" fill="black"/><line x1="12" y1="20" x2="20" y2="20" stroke="black" stroke-width="2"/>
   <!-- Accessory -->
-  <path d="M10 8 L10 2 L13 6 L16 2 L19 6 L22 2 L22 8 Z" fill="gold"/>
+  <path d="M6 6 Q10 2 14 6 Q12 10 8 10 Z" fill="#8FBC8F" opacity="0.8"/>
 </svg>
