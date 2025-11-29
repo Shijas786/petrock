@@ -12,7 +12,7 @@ export async function GET() {
     frame: {
       version: "1",
       name: "Onchain Pet Rock",
-      iconUrl: `${appUrl}/icon.svg`,
+      iconUrl: `${appUrl}/icon.png`,
       homeUrl: appUrl,
       imageUrl: `${appUrl}/og-image.svg`,
       buttonTitle: "🪨 Open App",
