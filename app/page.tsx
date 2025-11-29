@@ -7,9 +7,12 @@ import PetRockCard from '@/components/PetRockCard'
 import Leaderboard from '@/components/Leaderboard'
 import { useState, useEffect } from 'react'
 
+type Tab = 'myRocks' | 'leaderboard'
+
 export default function Home() {
   const { address, isConnected } = useAccount()
   const [rocks, setRocks] = useState<any[]>([])
+  const [activeTab, setActiveTab] = useState<Tab>('myRocks')
 
   // 1. Get Balance
   const { data: balance, refetch: refetchBalance } = useReadContract({
@@ -90,58 +93,86 @@ export default function Home() {
 
   return (
     <main className="flex min-h-screen flex-col items-center p-4 md:p-8 max-w-md mx-auto relative font-pixel">
-      <header className="w-full text-center mb-8 mt-4">
+      <header className="w-full text-center mb-6 mt-4">
         <h1 className="text-2xl md:text-3xl font-bold mb-2 text-blue-600 drop-shadow-sm leading-relaxed">
           Onchain<br />Pet Rock
         </h1>
         <p className="text-[10px] md:text-xs text-gray-600 uppercase tracking-widest">Mint • Feed • Grow</p>
       </header>
 
-      {/* Leaderboard - visible to all */}
-      <div className="w-full mb-8">
-        <Leaderboard />
+      {/* Tab Navigation */}
+      <div className="w-full mb-6 flex gap-2">
+        <button
+          onClick={() => setActiveTab('myRocks')}
+          className={`flex-1 py-2 px-4 text-sm font-bold pixel-borders transition-colors ${
+            activeTab === 'myRocks'
+              ? 'bg-blue-500 text-white'
+              : 'bg-white text-gray-700 hover:bg-gray-50'
+          }`}
+        >
+          My Rocks
+        </button>
+        <button
+          onClick={() => setActiveTab('leaderboard')}
+          className={`flex-1 py-2 px-4 text-sm font-bold pixel-borders transition-colors ${
+            activeTab === 'leaderboard'
+              ? 'bg-blue-500 text-white'
+              : 'bg-white text-gray-700 hover:bg-gray-50'
+          }`}
+        >
+          🏆 Leaderboard
+        </button>
       </div>
 
-      {!isConnected ? (
-        <div className="flex flex-col items-center gap-8 mt-10 w-full">
-          <div className="text-8xl animate-bounce-slow filter drop-shadow-lg">🪨</div>
-          <div className="bg-white p-6 pixel-borders w-full text-center">
-            <p className="mb-4 text-xs leading-5">Connect your wallet to adopt a rock.</p>
-            <ConnectWalletButton />
-          </div>
+      {/* Tab Content */}
+      {activeTab === 'leaderboard' ? (
+        <div className="w-full">
+          <Leaderboard />
         </div>
       ) : (
-        <div className="w-full flex flex-col items-center gap-8">
-          <div className="flex justify-between w-full items-center px-2 bg-white/50 p-2 rounded pixel-borders">
-            <span className="text-[10px] font-bold text-gray-500">OWNER</span>
-            <ConnectWalletButton />
-          </div>
-
-          <div className="w-full flex flex-col gap-6 items-center">
-            {rocks.length > 0 ? (
-              rocks.map((rock) => (
-                <PetRockCard
-                  key={rock.id.toString()}
-                  tokenId={rock.id}
-                  xp={rock.xp}
-                  lastFedAt={rock.lastFedAt}
-                  canFeed={rock.canFeed}
-                  timeUntilNextFeed={rock.timeUntilNextFeed}
-                  onUpdate={refresh}
-                />
-              ))
-            ) : (
-              <div className="text-center py-10 opacity-60">
-                <p className="text-sm">No rocks found.</p>
-                <p className="text-[10px] mt-2">Mint to generate your unique pet!</p>
+        <>
+          {!isConnected ? (
+            <div className="flex flex-col items-center gap-8 mt-10 w-full">
+              <div className="text-8xl animate-bounce-slow filter drop-shadow-lg">🪨</div>
+              <div className="bg-white p-6 pixel-borders w-full text-center">
+                <p className="mb-4 text-xs leading-5">Connect your wallet to adopt a rock.</p>
+                <ConnectWalletButton />
               </div>
-            )}
-
-            <div className="mt-4 w-full flex justify-center">
-              <MintButton onMintSuccess={refresh} />
             </div>
-          </div>
-        </div>
+          ) : (
+            <div className="w-full flex flex-col items-center gap-8">
+              <div className="flex justify-between w-full items-center px-2 bg-white/50 p-2 rounded pixel-borders">
+                <span className="text-[10px] font-bold text-gray-500">OWNER</span>
+                <ConnectWalletButton />
+              </div>
+
+              <div className="w-full flex flex-col gap-6 items-center">
+                {rocks.length > 0 ? (
+                  rocks.map((rock) => (
+                    <PetRockCard
+                      key={rock.id.toString()}
+                      tokenId={rock.id}
+                      xp={rock.xp}
+                      lastFedAt={rock.lastFedAt}
+                      canFeed={rock.canFeed}
+                      timeUntilNextFeed={rock.timeUntilNextFeed}
+                      onUpdate={refresh}
+                    />
+                  ))
+                ) : (
+                  <div className="text-center py-10 opacity-60">
+                    <p className="text-sm">No rocks found.</p>
+                    <p className="text-[10px] mt-2">Mint to generate your unique pet!</p>
+                  </div>
+                )}
+
+                <div className="mt-4 w-full flex justify-center">
+                  <MintButton onMintSuccess={refresh} />
+                </div>
+              </div>
+            </div>
+          )}
+        </>
       )}
 
       <footer className="mt-auto py-8 text-[10px] text-gray-400 text-center">
