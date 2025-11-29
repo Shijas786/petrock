@@ -1,0 +1,10 @@
+<svg width="128" height="128" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges">
+  <!-- Bg Shadow -->
+  <path d="M4 16 C4 8, 8 4, 16 4 C24 4, 28 8, 28 16 C28 24, 24 28, 16 28 C8 28, 4 24, 4 16 Z" transform="translate(2, 2)" fill="rgba(0,0,0,0.2)"/>
+  <!-- Body -->
+  <path d="M4 16 C4 8, 8 4, 16 4 C24 4, 28 8, 28 16 C28 24, 24 28, 16 28 C8 28, 4 24, 4 16 Z" fill="#C7CEEA"/>
+  <!-- Face -->
+  <rect x="8" y="12" width="16" height="4" fill="black"/><line x1="8" y1="13" x2="4" y2="12" stroke="black" stroke-width="1"/><line x1="24" y1="13" x2="28" y2="12" stroke="black" stroke-width="1"/><path d="M12 20 Q16 24 20 20" stroke="black" stroke-width="2" fill="none"/>
+  <!-- Accessory -->
+  
+</svg>

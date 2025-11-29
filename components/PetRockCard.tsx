@@ -27,32 +27,20 @@ export default function PetRockCard({
     return `${s}s`
   }
 
-  // Procedural generation based on Token ID
-  const getRockStyle = (id: bigint) => {
-    const idNum = Number(id)
-    const hues = [0, 45, 90, 135, 180, 225, 270, 315]
-    const faces = ['._.', 'o_o', '^_^', '-_-', '>_<', 'O_O', 'u_u', 'x_x']
-
-    return {
-      hue: hues[idNum % hues.length],
-      face: faces[idNum % faces.length]
-    }
-  }
-
-  const style = getRockStyle(tokenId)
+  // Get rock image based on ID (0-249)
+  const rockImageSrc = `/rocks/rock_${Number(tokenId) % 250}.svg`
 
   return (
     <div className="bg-white p-6 pixel-borders flex flex-col items-center gap-4 w-full max-w-xs relative">
       <div className="absolute top-2 right-2 text-[10px] text-gray-400">#{tokenId.toString()}</div>
 
-      <div
-        className="text-6xl animate-bounce-slow mt-2 relative"
-        style={{ filter: `hue-rotate(${style.hue}deg)` }}
-      >
-        🪨
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-xs font-bold text-black bg-white/50 px-1 rounded-sm backdrop-blur-sm">
-          {style.face}
-        </div>
+      <div className="relative w-32 h-32 mt-2 animate-bounce-slow">
+        <img
+          src={rockImageSrc}
+          alt={`Pet Rock #${tokenId}`}
+          className="w-full h-full object-contain pixelated"
+          style={{ imageRendering: 'pixelated' }}
+        />
       </div>
 
       <div className="w-full space-y-2">
