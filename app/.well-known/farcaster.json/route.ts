@@ -19,6 +19,22 @@ export async function GET() {
       splashImageUrl: `${appUrl}/splash.svg`,
       splashBackgroundColor: "#f8fafc",
       webhookUrl: `${appUrl}/api/webhook`
+    },
+    screenshots: [
+      {
+        src: `${appUrl}/screenshots/shot1.png`,
+        sizes: "1170x2532",
+        type: "image/png"
+      },
+      {
+        src: `${appUrl}/screenshots/shot2.png`,
+        sizes: "1170x2532",
+        type: "image/png"
+      }
+    ],
+    heroImage: {
+      src: `${appUrl}/hero.png`,
+      type: "image/png"
     }
   };
 
