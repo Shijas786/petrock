@@ -1,0 +1,54 @@
+{
+    "name": "Onchain Pet Rock",
+    "description": "Mint, feed, and grow your own unique pixel-art pet rock on the Base blockchain. A cozy, low-maintenance pet that lives forever.",
+    "tagline": "The pet that lives forever.",
+    "primaryCategory": "social",
+    "tags": [
+        "game",
+        "pixel-art",
+        "onchain",
+        "pet",
+        "casual"
+    ],
+    "icons": [
+        {
+            "src": "/icon.png",
+            "sizes": "1024x1024",
+            "type": "image/png"
+        }
+    ],
+    "screenshots": [
+        {
+            "src": "/screenshots/shot1.png",
+            "sizes": "1170x2532",
+            "type": "image/png"
+        },
+        {
+            "src": "/screenshots/shot2.png",
+            "sizes": "1170x2532",
+            "type": "image/png"
+        }
+    ],
+    "heroImage": {
+        "src": "/hero.png",
+        "type": "image/png"
+    },
+    "frame": {
+        "version": "vNext",
+        "image": {
+            "src": "/icon.png",
+            "aspectRatio": "1:1"
+        },
+        "buttons": [
+            {
+                "action": "launch_frame",
+                "name": "🪨 Open App",
+                "target": "https://onchain-pet-rock.vercel.app"
+            }
+        ]
+    },
+    "ogTitle": "Onchain Pet Rock",
+    "ogDescription": "Mint and feed your pet rock onchain.",
+    "ogImage": "/icon.png",
+    "castShareUrl": "https://onchain-pet-rock.vercel.app"
+}
