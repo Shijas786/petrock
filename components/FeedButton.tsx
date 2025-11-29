@@ -24,7 +24,7 @@ export default function FeedButton({ tokenId, disabled, onFeedSuccess }: { token
     const errorMessage = useMemo(() => {
         if (!error) return null
         const msg = error.message || ''
-        
+
         if (msg.includes('User rejected') || msg.includes('user rejected')) {
             return 'Cancelled'
         }
@@ -40,8 +40,15 @@ export default function FeedButton({ tokenId, disabled, onFeedSuccess }: { token
         return 'Error feeding'
     }, [error])
 
+    const playSound = () => {
+        const audio = new Audio('/audio/eat.wav')
+        audio.volume = 0.4
+        audio.play().catch(e => console.log("Audio play failed", e))
+    }
+
     const handleFeed = () => {
         reset()
+        playSound()
         writeContract({
             ...petRockContractConfig,
             functionName: 'feed',

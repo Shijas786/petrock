@@ -15,7 +15,7 @@ export const metadata: Metadata = {
   // Farcaster Frame metadata
   other: {
     "fc:frame": "vNext",
-    "fc:frame:image": `${APP_URL}/og-image.png`,
+    "fc:frame:image": `${APP_URL}/icon.png`,
     "fc:frame:image:aspect_ratio": "1:1",
     "fc:frame:button:1": "🪨 Open App",
     "fc:frame:button:1:action": "launch_frame",
@@ -23,7 +23,7 @@ export const metadata: Metadata = {
     // Mini App manifest
     "of:version": "vNext",
     "of:accepts:xmtp": "2024-02-01",
-    "of:image": `${APP_URL}/og-image.png`,
+    "of:image": `${APP_URL}/icon.png`,
   },
   openGraph: {
     title: "Onchain Pet Rock",
