@@ -40,7 +40,7 @@ export default function MintButton({ onMintSuccess }: { onMintSuccess: () => voi
         console.error('Error JSON:', JSON.stringify(error, null, 2))
         
         // Try multiple ways to extract message
-        const msg = error?.message || error?.shortMessage || error?.details || String(error) || ''
+        const msg = (error as any)?.message || (error as any)?.shortMessage || (error as any)?.details || String(error) || ''
         
         console.error('Extracted message:', msg)
         
