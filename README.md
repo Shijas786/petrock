@@ -5,6 +5,7 @@ A Web3 dApp where users mint Pet Rock NFTs and feed them daily for XP. Built as 
 ## Features
 
 - **Mint Pet Rocks**: Each user can mint unique Pet Rock NFTs
+- **Generative Pixel Art**: Over 100 unique pixel-art styles for rocks, varying in color, faces, and accessories
 - **Daily Feeding**: Feed your rocks once every 24 hours to gain XP
 - **XP System**: Rocks level up with different personalities based on XP
 - **Mobile-First UI**: Clean, pixel-art inspired design
